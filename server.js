@@ -5,10 +5,20 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
 const server = jsonServer.create();
+
 const router = jsonServer.router('./database.json');
 const userdb = JSON.parse(fs.readFileSync('./db.json', 'UTF-8'));
 
-server.use(cors());
+const corsOptions = {
+  "origin": "*",
+  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  "preflightContinue": false,
+  "optionsSuccessStatus": 204,
+  "exposedHeaders": ['Authorization']
+};
+
+server.use(cors(corsOptions));
+// server.use(jsonServer.defaults());
 server.use(bodyParser.urlencoded({ extended: true }));
 server.use(bodyParser.json());
 
@@ -37,15 +47,42 @@ server.post('/login', (req, res) => {
     return;
   }
   const access_token = createToken({ email, password });
-  res.status(200).json({ access_token });
+  const user = userdb.users.find(user => user.email === email && user.password === password);
+  res.status(200).json({ access_token, user });
 });
 
-server.post('/add/user', (req, res) => {
-  console.log(req.body);
-  res.status(200).message('Success!');
+server.get('/users', (req, res) => {
+  const data = userdb.users;
+  res.status(200).json({ data });
+});
+
+server.get('/users/:id', (req, res) => {
+  const data = userdb.users.find(user => user.id == req.params.id);
+  res.status(200).json({ data });
+});
+
+server.post('/users', (req, res) => {
+  userdb.users.push(req.body);
+  const data = userdb.users;
+  res.status(200).json({ data });
+});
+
+server.put('/users/:id', (req, res) => {
+  const index = userdb.users.findIndex(user => user.id == req.params.id);
+  userdb.users[index] = req.body;
+  console.log(userdb.users);
+  const data = userdb.users;
+  res.status(200).json({ data });
+});
+
+server.delete('/users/:id', (req, res) => {
+  const index = userdb.users.findIndex(user => user.id == req.params.id);
+  const data = userdb.users.splice(index, 1);
+  res.status(200).json({ data });
 });
 
 server.use(/^(?!\/auth).*$/, (req, res, next) => {
+  console.log(req.headers.authorization);
   if (req.headers.authorization === undefined || req.headers.authorization.split(' ')[0] !== 'Bearer') {
     const status = 401;
     const message = 'Error in authorization format';

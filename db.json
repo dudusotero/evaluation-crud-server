@@ -4,13 +4,15 @@
       "id": 1,
       "name": "Admin",
       "email": "admin@test.com",
-      "password": "1234"
+      "password": "1234",
+      "role": "ADMIN"
     },
     {
       "id": 2,
       "name": "Normal User",
       "email": "user@test.com",
-      "password": "123456"
+      "password": "123456",
+      "role": "NORMAL"
     }
   ]
 }
