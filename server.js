@@ -48,7 +48,7 @@ server.post('/login', (req, res) => {
   }
   const access_token = createToken({ email, password });
   const user = userdb.users.find(user => user.email === email && user.password === password);
-  res.status(200).json({ access_token, user });
+  res.status(202).json({ access_token, user });
 });
 
 server.get('/users', (req, res) => {
